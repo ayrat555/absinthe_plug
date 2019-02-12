@@ -169,6 +169,7 @@ defmodule Absinthe.Plug.GraphiQL do
     |> Map.put(:assets, assets)
     |> Map.put(:socket, Keyword.get(opts, :socket))
     |> Map.put(:socket_url, Keyword.get(opts, :socket_url))
+    |> Map.put(:default_query, Keyword.get(opts, :default_query, ""))
     |> set_pipeline
   end
 
@@ -308,12 +309,12 @@ defmodule Absinthe.Plug.GraphiQL do
     end
   end
 
-  @render_defaults %{query: "", var_string: "", results: ""}
+  @render_defaults %{var_string: "", results: ""}
 
   @spec render_interface(conn :: Conn.t, interface :: :advanced | :simple, opts :: Keyword.t) :: Conn.t
   defp render_interface(conn, interface, opts)
   defp render_interface(conn, :simple, opts) do
-    opts = Map.merge(@render_defaults, opts)
+    opts = opts_with_default(opts)
 
     graphiql_html(
       opts[:query], opts[:var_string], opts[:result], opts[:socket_url], opts[:assets]
@@ -321,7 +322,7 @@ defmodule Absinthe.Plug.GraphiQL do
     |> rendered(conn)
   end
   defp render_interface(conn, :advanced, opts) do
-    opts = Map.merge(@render_defaults, opts)
+    opts = opts_with_default(opts)
 
     graphiql_workspace_html(
       opts[:query], opts[:var_string], opts[:default_headers],
@@ -330,12 +331,18 @@ defmodule Absinthe.Plug.GraphiQL do
     |> rendered(conn)
   end
   defp render_interface(conn, :playground, opts) do
-    opts = Map.merge(@render_defaults, opts)
+    opts = opts_with_default(opts)
 
     graphiql_playground_html(
       default_url(opts[:default_url]), opts[:socket_url], opts[:assets]
     )
     |> rendered(conn)
+  end
+
+  defp opts_with_default(opts) do
+    defaults = Map.put(@render_defaults, :query, opts[:default_query])
+
+    Map.merge(defaults, opts)
   end
 
   defp default_url(nil), do: "window.location.origin + window.location.pathname"
