@@ -1,3 +1,7 @@
+V1.4.6
+
+- Allow to pass a default query to GraphiQL interface
+
 v1.4.5
 
 - Fixes support for newer Phoenix versions.
